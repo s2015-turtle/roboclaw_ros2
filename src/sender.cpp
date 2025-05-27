@@ -1,7 +1,12 @@
-#include <linux/serial.h>
-#include <sys/ioctl.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdint.h>
+#include "sender.hpp"
 
-int send(uint8_t address, )
+Sender::Sender(std::shared_ptr<SerialPort> device)
+    : device_(std::move(device))  {
+    if (!device_ || !device_->isOpen()) {
+        handleError("Serial port is not open or invalid.");
+    }
+}
+
+
+Sender::~Sender() {
+}

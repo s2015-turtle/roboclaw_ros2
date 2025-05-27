@@ -7,21 +7,18 @@
 #include <string>
 #include <vector>
 #include <termios.h>
+#include "rclcpp/rclcpp.hpp"
+
+#include "serial_port.hpp"
 
 class Sender {
 public:
-    Sender(std::string device, int baudrate);
+    Sender(std::shared_ptr<SerialPort> device);
     ~Sender();
     bool send(const std::vector<uint8_t>& data, size_t length);
-    bool isOpen() const;
-    void open();
-    void close();
 
 private:
-    std::string device_;
-    int baudrate_;
-    int fd_;
-    struct termios options_;
+    std::shared_ptr<SerialPort> device_;
 
     bool setBaudRate(int baudrate);
     bool configurePort();
