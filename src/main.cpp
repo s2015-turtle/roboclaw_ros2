@@ -1,12 +1,13 @@
 #include "rclcpp/rclcpp.hpp"
 #include "roboclaw_ros2/serial_port.hpp"
 
-int main(int argc, char** argv) {
-    rclcpp::init(argc, argv);
+int main(int argc, char ** argv)
+{
+  rclcpp::init(argc, argv);
 
-    auto node = rclcpp::Node::make_shared("hello");
-    RCLCPP_INFO(node->get_logger(), "Hello, ROS2 world!");
+  auto node = rclcpp::Node::make_shared("hello");
+  RCLCPP_INFO(node->get_logger(), "Hello, ROS2 world!");
 
-    rclcpp::shutdown();
-    return 0;
+  rclcpp::shutdown();
+  return 0;
 }

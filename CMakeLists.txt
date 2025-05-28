@@ -5,6 +5,13 @@ if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
 endif()
 
+execute_process(
+  COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/code_format.sh
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  OUTPUT_QUIET
+  ERROR_QUIET
+)
+
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
