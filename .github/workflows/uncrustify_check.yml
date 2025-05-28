@@ -1,0 +1,40 @@
+name: Uncrustify Format Check
+
+on: [push, pull_request]
+
+jobs:
+  format_check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  
+
+    - name: Install ament_uncrustify
+      run: |
+        sudo apt update
+        sudo apt install -y python3-pip uncrustify
+        pip3 install -U ament_uncrustify
+
+    - name: Run ament_uncrustify
+      run: |
+        ament_uncrustify --reformat > uncrustify_output.txt || true
+
+    - name: Check for uncrustify changes
+      id: diffcheck
+      run: |
+        if git diff --quiet; then
+          echo "no_diff=true" >> $GITHUB_OUTPUT
+        else
+          echo "Uncrustify made changes. Please fix formatting."
+          git diff
+          exit 1
+        fi
+
+    - name: Trigger next workflow
+      if: steps.diffcheck.outputs.no_diff == 'true'
+      uses: benc-uk/workflow-dispatch@v1
+      with:
+        workflow: Run Main Build
+        token: ${{ secrets.GITHUB_TOKEN }}
