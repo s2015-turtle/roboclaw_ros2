@@ -23,7 +23,7 @@ jobs:
 
       - name: Build package
         run: |
-          source /opt/ros/humble/setup.bash
+          source /opt/ros/jazzy/setup.bash
           colcon build --event-handlers console_cohesion+
 
       - name: Run tests
