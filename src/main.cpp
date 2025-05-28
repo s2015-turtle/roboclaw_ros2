@@ -1,4 +1,5 @@
 #include "rclcpp/rclcpp.hpp"
+#include "roboclaw_ros2/serial_port.hpp"
 
 int main(int argc, char** argv) {
     rclcpp::init(argc, argv);

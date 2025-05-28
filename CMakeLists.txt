@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.8)
 project(roboclaw_ros2)
 
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 
 # find dependencies
@@ -18,7 +18,21 @@ find_package(rosidl_default_generators REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
-add_executable(hello src/main.cpp)
+set(main_src
+  src/main.cpp
+  src/serial_port.cpp
+)
+
+set(main_headers
+  include/roboclaw_ros2/serial_port.hpp
+)
+
+add_executable(hello ${main_src})
+
+target_include_directories(hello PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
 ament_target_dependencies(hello rclcpp)
 install(TARGETS hello DESTINATION lib/${PROJECT_NAME})
 
@@ -33,5 +47,9 @@ if(BUILD_TESTING)
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+install(DIRECTORY include/
+  DESTINATION include/
+)
 
 ament_package()

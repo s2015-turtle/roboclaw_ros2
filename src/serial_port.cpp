@@ -1,4 +1,4 @@
-#include "serial_port.hpp"
+#include "roboclaw_ros2/serial_port.hpp"
 
 SerialPort::SerialPort(const std::string& portName, unsigned int baudRate)
     : portName_(portName), baudRate_(baudRate), fd_(-1) {
@@ -73,6 +73,23 @@ std::unique_ptr<std::vector<uint8_t>> SerialPort::read(size_t size) {
     if (static_cast<size_t>(bytesRead) < size) {
         data->resize(bytesRead);
     }
-    
+
     return data;
+}
+
+size_t SerialPort::write(std::unique_ptr<std::vector<uint8_t>> const buffer) {
+    return this->write(reinterpret_cast<const char*>(buffer->data()), buffer->size());
+}
+
+size_t SerialPort::write(const char* buffer, size_t size) {
+    if (fd_ == -1) {
+        throw std::runtime_error("Serial port is not open.");
+    }
+
+    ssize_t bytesWritten = ::write(fd_, buffer, size);
+    if (bytesWritten < 0) {
+        throw std::runtime_error("Failed to write to serial port: " + portName_);
+    }
+
+    return static_cast<size_t>(bytesWritten);
 }
