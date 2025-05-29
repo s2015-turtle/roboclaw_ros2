@@ -8,6 +8,7 @@
 #include <memory>
 #include <vector>
 #include <sys/ioctl.h>
+#include <optional>
 
 class SerialPort {
 private:
@@ -26,8 +27,8 @@ public:
   void close();
   bool isOpen() const;
 
-  std::unique_ptr<std::vector<uint8_t>> read(size_t size);
-  size_t write(std::unique_ptr<std::vector<uint8_t>> buffer);
+  std::optional<std::vector<uint8_t>> read(size_t size);
+  size_t write(const std::vector<uint8_t> && buffer);
   size_t write(const char * buffer, size_t size);
   void setBaudRate(unsigned int baudRate);
   unsigned int getBaudRate() const;

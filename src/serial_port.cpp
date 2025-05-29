@@ -53,39 +53,30 @@ bool SerialPort::isOpen() const
   return fd_ != -1;
 }
 
-std::unique_ptr<std::vector<uint8_t>> SerialPort::read(size_t size)
+std::optional<std::vector<uint8_t>> SerialPort::read(size_t size)
 {
-  int available_size = 0;
-  auto data = std::make_unique<std::vector<uint8_t>>();
+  auto data = std::vector<uint8_t>();
 
   if (fd_ == -1) {
     throw std::runtime_error("Serial port is not open.");
   }
-  ioctl(fd_, FIONREAD, &available_size);
-
-  if (available_size < static_cast<int>(size)) {
-    size = static_cast<size_t>(available_size);
-  }
   if (size == 0) {
-    return data;
+    return std::nullopt;
   }
 
-  data->resize(size);
+  data.resize(size);
 
-  ssize_t bytesRead = ::read(fd_, data->data(), size);
+  ssize_t bytesRead = ::read(fd_, data.data(), size);
   if (bytesRead < 0) {
     throw std::runtime_error("Failed to read from serial port: " + portName_);
-  }
-  if (static_cast<size_t>(bytesRead) < size) {
-    data->resize(bytesRead);
   }
 
   return data;
 }
 
-size_t SerialPort::write(std::unique_ptr<std::vector<uint8_t>> const buffer)
+size_t SerialPort::write(const std::vector<uint8_t> && buffer)
 {
-  return this->write(reinterpret_cast<const char *>(buffer->data()), buffer->size());
+  return this->write(reinterpret_cast<const char *>(buffer.data()), buffer.size());
 }
 
 size_t SerialPort::write(const char * buffer, size_t size)
@@ -100,4 +91,30 @@ size_t SerialPort::write(const char * buffer, size_t size)
   }
 
   return static_cast<size_t>(bytesWritten);
+}
+
+void SerialPort::setBaudRate(unsigned int baudRate)
+{
+  if (fd_ == -1) {
+    throw std::runtime_error("Serial port is not open.");
+  }
+
+  struct termios options;
+  if (tcgetattr(fd_, &options) < 0) {
+    throw std::runtime_error("Failed to get terminal attributes for: " + portName_);
+  }
+
+  cfsetispeed(&options, baudRate);
+  cfsetospeed(&options, baudRate);
+
+  if (tcsetattr(fd_, TCSANOW, &options) < 0) {
+    throw std::runtime_error("Failed to set terminal attributes for: " + portName_);
+  }
+
+  baudRate_ = baudRate;
+}
+
+unsigned int SerialPort::getBaudRate() const
+{
+  return baudRate_;
 }
