@@ -34,11 +34,6 @@ bool Sender::send(std::vector<uint8_t> && data)
   return true;
 }
 
-bool Sender::drive_forward_M1(uint8_t address, uint8_t value)
-{
-  return this->compatibility_commands(address, 0x00, value);
-}
-
 uint16_t Sender::crc16(const std::vector<uint8_t> & data)
 {
   uint16_t crc = 0; // Initial value
@@ -55,17 +50,7 @@ uint16_t Sender::crc16(const std::vector<uint8_t> & data)
   return crc & 0xFFFF;
 }
 
-bool Sender::compatibility_commands(uint8_t address, uint8_t command, uint8_t byte_value)
+void Sender::handleError(const std::string & message)
 {
-
-  std::vector<uint8_t> data(5);
-  data.push_back(address);
-  data.push_back(command);
-  data.push_back(byte_value);
-
-  uint16_t crc = crc16(data);
-  data.push_back(static_cast<uint8_t>(crc >> 8));
-  data.push_back(static_cast<uint8_t>(crc & 0xFF));
-
-  return send(std::move(data));
+  RCLCPP_ERROR(rclcpp::get_logger("Sender"), "%s", message.c_str());
 }
