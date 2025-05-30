@@ -1,3 +1,5 @@
+#ifndef ROBOCLAW_ROS2_RECEIVER_HPP
+#define ROBOCLAW_ROS2_RECEIVER_HPP
 #include <linux/serial.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
@@ -10,8 +12,10 @@
 #include <optional>
 #include "rclcpp/rclcpp.hpp"
 
-#include "serial_port.hpp"
+#include "roboclaw_ros2/serial_port.hpp"
 
+namespace roboclaw_ros2
+{
 class Receiver {
 public:
   Receiver(std::shared_ptr<SerialPort> device);
@@ -25,3 +29,5 @@ private:
   void handleError(const std::string & message);
 
 };
+}
+#endif // ROBOCLAW_ROS2_RECEIVER_HPP

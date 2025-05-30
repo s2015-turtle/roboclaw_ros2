@@ -1,3 +1,5 @@
+#ifndef ROBOCLAW_ROS2_SERIAL_PORT_HPP
+#define ROBOCLAW_ROS2_SERIAL_PORT_HPP
 #include <string>
 #include <cstddef>
 #include <stdexcept>
@@ -10,6 +12,8 @@
 #include <sys/ioctl.h>
 #include <optional>
 
+namespace roboclaw_ros2
+{
 class SerialPort {
 private:
   SerialPort(const SerialPort &) = delete;
@@ -33,3 +37,5 @@ public:
   void setBaudRate(unsigned int baudRate);
   unsigned int getBaudRate() const;
 };
+}
+#endif // ROBOCLAW_ROS2_SERIAL_PORT_HPP

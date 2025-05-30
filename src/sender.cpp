@@ -1,5 +1,6 @@
-#include "sender.hpp"
+#include "roboclaw_ros2/sender.hpp"
 
+using namespace roboclaw_ros2;
 Sender::Sender(std::shared_ptr<SerialPort> device)
 : device_(std::move(device))
 {
@@ -21,6 +22,7 @@ bool Sender::send(std::vector<uint8_t> && data)
   }
 
   uint16_t crc = crc16(data);
+  //std::cout << "CRC: " << std::hex << crc << std::dec << std::endl;
   data.push_back(static_cast<uint8_t>(crc >> 8));
   data.push_back(static_cast<uint8_t>(crc & 0xFF));
 
@@ -38,7 +40,7 @@ uint16_t Sender::crc16(const std::vector<uint8_t> & data)
 {
   uint16_t crc = 0; // Initial value
   for (int byte = 0; byte < data.size(); byte++) {
-    uint16_t crc = crc ^ ((unsigned int)data[byte] << 8);
+    crc = crc ^ ((unsigned int)data[byte] << 8);
     for (unsigned char bit = 0; bit < 8; bit++) {
       if (crc & 0x8000) {
         crc = (crc << 1) ^ 0x1021;

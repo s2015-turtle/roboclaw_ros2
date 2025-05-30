@@ -1,5 +1,7 @@
 #include "roboclaw_ros2/serial_port.hpp"
+#include "rclcpp/rclcpp.hpp"
 
+using namespace roboclaw_ros2;
 SerialPort::SerialPort(const std::string & portName, unsigned int baudRate)
 : portName_(portName), baudRate_(baudRate), fd_(-1)
 {
@@ -86,8 +88,12 @@ size_t SerialPort::write(const char * buffer, size_t size)
   }
 
   ssize_t bytesWritten = ::write(fd_, buffer, size);
-  if (bytesWritten < 0) {
+  if (bytesWritten <= 0) {
     throw std::runtime_error("Failed to write to serial port: " + portName_);
+  }
+
+  for(size_t i = 0; i < static_cast<size_t>(bytesWritten); ++i) {
+  RCLCPP_INFO(rclcpp::get_logger("SerialPort"), "Wrote byte: %02X", static_cast<unsigned char>(buffer[i]));
   }
 
   return static_cast<size_t>(bytesWritten);

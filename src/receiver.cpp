@@ -1,5 +1,6 @@
 #include "roboclaw_ros2/receiver.hpp"
 
+using namespace roboclaw_ros2;
 Receiver::Receiver(std::shared_ptr<SerialPort> device)
 : device_(std::move(device))
 {
