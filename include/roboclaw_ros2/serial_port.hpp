@@ -19,6 +19,11 @@ private:
   SerialPort(const SerialPort &) = delete;
   SerialPort & operator=(const SerialPort &) = delete;
 
+  uint16_t crc16(const std::vector<uint8_t> & data);
+  uint16_t crc16(const char * data, size_t size);
+
+  void handleError(const std::string & message);
+
   std::string portName_;
   unsigned int baudRate_;
   int fd_;
@@ -31,9 +36,11 @@ public:
   void close();
   bool isOpen() const;
 
-  std::optional<std::vector<uint8_t>> read(size_t size);
-  size_t write(const std::vector<uint8_t> && buffer);
-  size_t write(const char * buffer, size_t size);
+  std::optional<std::vector<uint8_t>> receive(size_t size);
+  size_t send(const std::vector<uint8_t> && buffer);
+  size_t send(const char * buffer, size_t size);
+  size_t sendWithCRC(const std::vector<uint8_t> && buffer);
+  size_t sendWithCRC(const char * buffer, size_t size);
   void setBaudRate(unsigned int baudRate);
   unsigned int getBaudRate() const;
 };
