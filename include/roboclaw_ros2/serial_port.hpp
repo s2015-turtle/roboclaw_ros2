@@ -37,6 +37,7 @@ public:
   bool isOpen() const;
 
   std::optional<std::vector<uint8_t>> receive(size_t size);
+  std::optional<std::vector<uint8_t>> receiveWithCRC(size_t size);
   size_t send(const std::vector<uint8_t> && buffer);
   size_t send(const char * buffer, size_t size);
   size_t sendWithCRC(const std::vector<uint8_t> && buffer);

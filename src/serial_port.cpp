@@ -87,6 +87,49 @@ std::optional<std::vector<uint8_t>> SerialPort::receive(size_t size)
   return buffer;
 }
 
+std::optional<std::vector<uint8_t>> SerialPort::receiveWithCRC(size_t size)
+{
+  if (!this > isOpen()) {
+    handleError("Serial port is not open or invalid.");
+    return std::nullopt;
+  }
+
+  // int available_size = 0;
+  // ioctl(fd_, FIONREAD, &available_size);
+
+  // RCLCPP_INFO(rclcpp::get_logger("SerialPort"), "Available bytes: %d", available_size);
+
+  size += 2; 
+  std::vector<uint8_t> buffer(size);
+  ssize_t bytesRead = ::read(fd_, buffer.data(), size);
+  if (bytesRead < 0) {
+    handleError("Failed to read from serial port: " + portName_);
+    perror("read error");
+    return std::nullopt;
+  }
+  if (bytesRead <= 2) {
+    RCLCPP_WARN(rclcpp::get_logger("SerialPort"), "No data received from serial port: %s",
+      portName_.c_str());
+    return std::nullopt;
+  }
+
+  uint16_t receive_crc = (buffer[bytesRead - 2] << 8) | buffer[bytesRead - 1];
+  buffer.resize(bytesRead - 2); 
+
+  uint16_t calculate_crc = crc16(buffer);
+
+  if (receive_crc != calculate_crc) {
+    RCLCPP_ERROR(rclcpp::get_logger("SerialPort"), "CRC mismatch: received %04X, calculated %04X",
+      receive_crc, calculate_crc);
+    return std::nullopt;
+  }
+
+
+  return buffer;
+}
+
+
+
 size_t SerialPort::send(const std::vector<uint8_t> && data)
 {
   return this->send(reinterpret_cast<const char *>(data.data()), data.size());
