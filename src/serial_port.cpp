@@ -1,5 +1,4 @@
 #include "roboclaw_ros2/serial_port.hpp"
-#include "rclcpp/rclcpp.hpp"
 
 using namespace roboclaw_ros2;
 SerialPort::SerialPort(const std::string & portName, unsigned int baudRate)
@@ -36,6 +35,9 @@ bool SerialPort::open()
   options.c_iflag &= ~(IXON | IXOFF | IXANY);
   options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
 
+  options.c_cc[VMIN] = 0;
+  options.c_cc[VTIME] = 10; 
+
   if (tcsetattr(fd_, TCSANOW, &options) < 0) {
     close();
     throw std::runtime_error("Failed to set terminal attributes for: " + portName_);
@@ -67,7 +69,6 @@ std::optional<std::vector<uint8_t>> SerialPort::receive(size_t size)
   int available_size = 0;
   ioctl(fd_, FIONREAD, &available_size);
 
-  RCLCPP_INFO(rclcpp::get_logger("SerialPort"), "Available bytes: %d", available_size);
 
   std::vector<uint8_t> buffer(size);
   ssize_t bytesRead = ::read(fd_, buffer.data(), size);
@@ -77,8 +78,7 @@ std::optional<std::vector<uint8_t>> SerialPort::receive(size_t size)
     return std::nullopt;
   }
   if (bytesRead == 0) {
-    RCLCPP_WARN(rclcpp::get_logger("SerialPort"), "No data received from serial port: %s",
-      portName_.c_str());
+
     return std::nullopt;
   }
 
@@ -99,7 +99,7 @@ std::optional<std::vector<uint8_t>> SerialPort::receiveWithCRC(size_t size)
 
   // RCLCPP_INFO(rclcpp::get_logger("SerialPort"), "Available bytes: %d", available_size);
 
-  size += 2; 
+  size += 2;
   std::vector<uint8_t> buffer(size);
   ssize_t bytesRead = ::read(fd_, buffer.data(), size);
   if (bytesRead < 0) {
@@ -108,26 +108,22 @@ std::optional<std::vector<uint8_t>> SerialPort::receiveWithCRC(size_t size)
     return std::nullopt;
   }
   if (bytesRead <= 2) {
-    RCLCPP_WARN(rclcpp::get_logger("SerialPort"), "No data received from serial port: %s",
-      portName_.c_str());
     return std::nullopt;
   }
 
   uint16_t receive_crc = (buffer[bytesRead - 2] << 8) | buffer[bytesRead - 1];
-  buffer.resize(bytesRead - 2); 
+  buffer.resize(bytesRead - 2);
 
   uint16_t calculate_crc = crc16(buffer);
 
   if (receive_crc != calculate_crc) {
-    RCLCPP_ERROR(rclcpp::get_logger("SerialPort"), "CRC mismatch: received %04X, calculated %04X",
-      receive_crc, calculate_crc);
+
     return std::nullopt;
   }
 
 
   return buffer;
 }
-
 
 
 size_t SerialPort::send(const std::vector<uint8_t> && data)
@@ -152,12 +148,6 @@ size_t SerialPort::send(const char * data, size_t size)
     handleError("Failed to write to serial port: " + portName_);
   }
 
-
-  for(size_t i = 0; i < static_cast<size_t>(bytesWritten); ++i) {
-    RCLCPP_INFO(rclcpp::get_logger("SerialPort"), "Wrote byte: %02X",
-      static_cast<unsigned char>(data[i]));
-  }
-
   return static_cast<size_t>(bytesWritten);
 }
 
@@ -169,7 +159,7 @@ size_t SerialPort::sendWithCRC(const char * data, size_t size)
 
   uint16_t crc = crc16(data, size);
   const char crcBytes[2] = {
-    static_cast<char>(crc >> 8), 
+    static_cast<char>(crc >> 8),
     static_cast<char>(crc & 0xFF)
   };
 
@@ -180,11 +170,6 @@ size_t SerialPort::sendWithCRC(const char * data, size_t size)
     handleError("Failed to write to serial port: " + portName_);
   }
 
-
-  for(size_t i = 0; i < static_cast<size_t>(bytesWritten); ++i) {
-    RCLCPP_INFO(rclcpp::get_logger("SerialPort"), "Wrote byte: %02X",
-      static_cast<unsigned char>(data[i]));
-  }
 
   return static_cast<size_t>(bytesWritten);
 
@@ -240,5 +225,5 @@ uint16_t SerialPort::crc16(const char * data, size_t size)
 
 void SerialPort::handleError(const std::string & message)
 {
-  RCLCPP_ERROR(rclcpp::get_logger("SerialPort"), "%s", message.c_str());
+  printf("%s", message.c_str());
 }

@@ -28,6 +28,7 @@ find_package(rosidl_default_generators REQUIRED)
 set(main_src
   src/main.cpp
   src/serial_port.cpp
+  src/roboclaw.cpp
 )
 
 add_executable(hello ${main_src})
