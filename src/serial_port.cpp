@@ -36,7 +36,7 @@ bool SerialPort::open()
   options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
 
   options.c_cc[VMIN] = 0;
-  options.c_cc[VTIME] = 10; 
+  options.c_cc[VTIME] = 10;
 
   if (tcsetattr(fd_, TCSANOW, &options) < 0) {
     close();

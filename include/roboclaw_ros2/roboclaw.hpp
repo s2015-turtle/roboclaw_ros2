@@ -13,7 +13,9 @@ private:
   uint8_t address_;
 
 public:
-  Roboclaw(const std::string & portName, const unsigned int baudRate = 38400, const uint8_t address = 0x80);
+  Roboclaw(
+    const std::string & portName, const unsigned int baudRate = 38400,
+    const uint8_t address = 0x80);
 
   ~Roboclaw();
   bool open();

@@ -31,8 +31,8 @@ bool Roboclaw::drive_forward_M1(int8_t speed)
     return false;
   }
 
-  if(speed > 127 || speed < 0) return false;
-  
+  if(speed > 127 || speed < 0) {return false;}
+
   std::vector<uint8_t> command = {address_, 0x00, static_cast<uint8_t>(speed)};
 
   size_t bytesSent = serialport_.sendWithCRC(std::move(command));
@@ -61,7 +61,7 @@ bool Roboclaw::drive_backward_M1(int8_t speed)
     return false;
   }
 
-  if(speed > 127 || speed < 0) return false;
+  if(speed > 127 || speed < 0) {return false;}
 
   std::vector<uint8_t> command = {address_, 0x01, static_cast<uint8_t>(speed)};
 
@@ -93,7 +93,7 @@ bool Roboclaw::set_minimum_main_voltage(int8_t voltage)
 
   uint8_t value = (voltage - 6) * 5;
   if(value < 0 || value > 140) {
-    return false; 
+    return false;
   }
 
   std::vector<uint8_t> command = {address_, 0x02, value};
@@ -126,7 +126,7 @@ bool Roboclaw::set_maximum_main_voltage(int8_t voltage)
 
   uint8_t value = voltage * 5.12;
   if(value < 30 || value > 175) {
-    return false; 
+    return false;
   }
 
   std::vector<uint8_t> command = {address_, 0x03, value};
@@ -157,8 +157,8 @@ bool Roboclaw::drive_forward_M2(int8_t speed)
     return false;
   }
 
-  if(speed > 127 || speed < 0) return false;
-  
+  if(speed > 127 || speed < 0) {return false;}
+
   std::vector<uint8_t> command = {address_, 0x04, static_cast<uint8_t>(speed)};
 
   size_t bytesSent = serialport_.sendWithCRC(std::move(command));
@@ -187,7 +187,7 @@ bool Roboclaw::drive_M1(int8_t speed)
     return false;
   }
 
-  if(speed > 127 || speed < 0) return false;
+  if(speed > 127 || speed < 0) {return false;}
 
   std::vector<uint8_t> command = {address_, 0x06, static_cast<uint8_t>(speed)};
 
@@ -217,8 +217,8 @@ bool Roboclaw::drive_M2(int8_t speed)
     return false;
   }
 
-  if(speed > 127 || speed < 0) return false;
-  
+  if(speed > 127 || speed < 0) {return false;}
+
   std::vector<uint8_t> command = {address_, 0x07, static_cast<uint8_t>(speed)};
 
   size_t bytesSent = serialport_.sendWithCRC(std::move(command));

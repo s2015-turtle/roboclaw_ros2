@@ -25,6 +25,16 @@ find_package(rosidl_default_generators REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
+
+set(msg_files
+  "msg/MotorCommand.msg"
+)
+ament_export_dependencies(rosidl_default_runtime)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  ${msg_files}
+)
+
 set(main_src
   src/main.cpp
   src/serial_port.cpp
