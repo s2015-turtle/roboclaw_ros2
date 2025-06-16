@@ -1,4 +1,3 @@
 # !/bin/sh
-ament_uncrustify --reformat include/roboclaw_ros2/
-ament_uncrustify --reformat src/
+ament_uncrustify --reformat .
 echo "Code formatting completed using ament_uncrustify."
