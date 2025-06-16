@@ -26,6 +26,10 @@ jobs:
         run: |
           . /opt/ros/jazzy/setup.sh
           colcon build --event-handlers console_cohesion+
+      
+      - name: code_format
+        run: |
+          . code_format.sh
 
       - name: Run tests
         run: |
