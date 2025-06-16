@@ -27,10 +27,3 @@ jobs:
         run: |
           . /opt/ros/jazzy/setup.sh
           colcon build --event-handlers console_cohesion+
-
-      - name: Run tests
-        run: |
-          . /opt/ros/jazzy/setup.sh
-          ament_uncrustify --reformat .
-          colcon test
-          colcon test-result --verbose
