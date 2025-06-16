@@ -21,6 +21,7 @@ jobs:
           apt update
           rosdep update
           rosdep install --from-paths src --ignore-src -r -y
+          apt install -y ros-jazzy-ament-cmake-uncrustify ros-jazzy-ament-uncrustify
 
       - name: Build package
         run: |
