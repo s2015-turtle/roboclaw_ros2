@@ -29,7 +29,7 @@ jobs:
       
       - name: code_format
         run: |
-          . code_format.sh
+          ament_uncrustify --reformat .
 
       - name: Run tests
         run: |
