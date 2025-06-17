@@ -3,6 +3,7 @@
 
 #include "roboclaw_ros2/serial_port.hpp"
 #include <mutex>
+#include <tuple>
 
 namespace roboclaw_ros2
 {
@@ -21,14 +22,12 @@ public:
   bool open();
   void close();
 
-  bool drive_forward_M1(int8_t speed);
-  bool drive_backward_M1(int8_t speed);
   bool set_minimum_main_voltage(int8_t voltage);
   bool set_maximum_main_voltage(int8_t voltage);
-  bool drive_forward_M2(int8_t speed);
-  bool drive_backward_M2(int8_t speed);
-  bool drive_M1(int8_t speed);
-  bool drive_M2(int8_t speed);
+  bool drive_M1(int8_t power);
+  bool drive_M2(int8_t power);
+
+  std::pair<uint32_t, uint32_t> read_encoder_counts(void);
 };
 }
 #endif // ROBOCLAW_ROS2_ROBOCLAW_HPP

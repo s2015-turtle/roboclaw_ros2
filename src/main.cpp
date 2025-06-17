@@ -18,16 +18,11 @@ int main(int argc, char ** argv)
 
   while(rclcpp::ok()) {
     std::vector<uint8_t> dataToSend = {0x80, 0x0, 30};
-    std::vector<uint8_t> dataToSend2 = {0x80, 0x0, 60};
-    auto result = Roboclaw->set_minimum_main_voltage(12);
-    result = Roboclaw->set_maximum_main_voltage(15);
-    rclcpp::sleep_for(10ms);
-    result = Roboclaw->drive_forward_M1(50);
-    if (!result) {
-      RCLCPP_ERROR(rclcpp::get_logger("main"), "Failed to send data.");
-      break;
-    }
-    rclcpp::sleep_for(500ms);
+    auto result = Roboclaw->read_encoder_counts();
+    
+    
+    RCLCPP_INFO(rclcpp::get_logger("main"), "Encoder counts: M1: %u, M2: %u", result.first, result.second);
+    rclcpp::sleep_for(100ms);
     // if (!sender.send(std::move(dataToSend2))) {
     //   RCLCPP_ERROR(rclcpp::get_logger("main"), "Failed to send data.");
     //   break;
