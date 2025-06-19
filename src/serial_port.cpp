@@ -1,4 +1,5 @@
 #include "roboclaw_ros2/serial_port.hpp"
+#include <iostream>
 
 using namespace roboclaw_ros2;
 SerialPort::SerialPort(const std::string & portName, unsigned int baudRate)
@@ -72,22 +73,24 @@ std::optional<std::vector<uint8_t>> SerialPort::receive(size_t size)
 
   std::vector<uint8_t> buffer(size);
   ssize_t bytesRead = ::read(fd_, buffer.data(), size);
+  tcflush(fd_, TCIOFLUSH);
+
   if (bytesRead < 0) {
     handleError("Failed to read from serial port: " + portName_);
     perror("read error");
     return std::nullopt;
   }
   if (bytesRead == 0) {
-
+    handleError("No data available to read from serial port: " + portName_);
     return std::nullopt;
   }
 
   buffer.resize(static_cast<size_t>(bytesRead));
-
+ 
   return buffer;
 }
 
-std::optional<std::vector<uint8_t>> SerialPort::receiveWithCRC(size_t size)
+std::optional<std::vector<uint8_t>> SerialPort::receiveWithCRC(size_t size, uint16_t send_crc)
 {
   if (!this > isOpen()) {
     handleError("Serial port is not open or invalid.");
@@ -102,22 +105,28 @@ std::optional<std::vector<uint8_t>> SerialPort::receiveWithCRC(size_t size)
   size += 2;
   std::vector<uint8_t> buffer(size);
   ssize_t bytesRead = ::read(fd_, buffer.data(), size);
+  tcflush(fd_, TCIOFLUSH); 
+
   if (bytesRead < 0) {
     handleError("Failed to read from serial port: " + portName_);
     perror("read error");
     return std::nullopt;
   }
-  if (bytesRead <= 2) {
+  if (bytesRead < size) {
+    handleError("Not enough data read from serial port: " + portName_);
     return std::nullopt;
   }
 
-  uint16_t receive_crc = (buffer[bytesRead - 2] << 8) | buffer[bytesRead - 1];
+  uint16_t receive_crc = (uint16_t)(buffer[bytesRead - 2] << 8) | (uint16_t)buffer[bytesRead - 1];
   buffer.resize(bytesRead - 2);
 
-  uint16_t calculate_crc = crc16(buffer);
+  uint16_t calculate_crc = crc16(buffer, send_crc);
+
 
   if (receive_crc != calculate_crc) {
-
+    handleError("CRC mismatch: received " + std::to_string(receive_crc) +
+                ", calculated " + std::to_string(calculate_crc) +
+                " on port: " + portName_);
     return std::nullopt;
   }
 
@@ -202,14 +211,14 @@ unsigned int SerialPort::getBaudRate() const
   return baudRate_;
 }
 
-uint16_t SerialPort::crc16(const std::vector<uint8_t> & data)
+uint16_t SerialPort::crc16(const std::vector<uint8_t> & data, int initial_crc)
 {
-  return crc16(reinterpret_cast<const char *>(data.data()), data.size());
+  return crc16(reinterpret_cast<const char *>(data.data()), data.size(), initial_crc);
 }
 
-uint16_t SerialPort::crc16(const char * data, size_t size)
+uint16_t SerialPort::crc16(const char * data, size_t size, int initial_crc)
 {
-  uint16_t crc = 0; // Initial value
+  int crc = initial_crc; // Initial value
   for (int byte = 0; byte < size; byte++) {
     crc = crc ^ ((unsigned int)data[byte] << 8);
     for (unsigned char bit = 0; bit < 8; bit++) {
@@ -225,5 +234,5 @@ uint16_t SerialPort::crc16(const char * data, size_t size)
 
 void SerialPort::handleError(const std::string & message)
 {
-  printf("%s", message.c_str());
+  printf("%s\n", message.c_str());
 }

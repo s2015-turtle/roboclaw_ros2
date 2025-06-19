@@ -26,6 +26,9 @@ public:
   bool set_maximum_main_voltage(int8_t voltage);
   bool drive_M1(int8_t power);
   bool drive_M2(int8_t power);
+  std::optional<uint32_t> read_encoder_count_M1(void);
+  std::optional<uint32_t> read_encoder_count_M2(void);
+
 
   std::pair<uint32_t, uint32_t> read_encoder_counts(void);
 };
